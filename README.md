@@ -26,10 +26,28 @@
     chdir: /tmp/nagios-4.4.6
 
 - name: Install Nagios Plugins
-  get_url:
-    url: https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
-    dest: /tmp/nagios-plugins-2.3.3.tar.gz
+  unarchive:
+    src: https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
+    dest: /tmp
+    remote_src: yes
 
 - name: Extract Nagios Plugins archive
   unarchive:
-    src: /tmp/nagios
+    src: /tmp/nagios-plugins-2.3.3.tar.gz
+    dest: /tmp
+    remote_src: yes
+
+- name: Configure Nagios Plugins
+  command: ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+  args:
+    chdir: /tmp/nagios-plugins-2.3.3
+
+- name: Build and install Nagios Plugins
+  command: make
+  args:
+    chdir: /tmp/nagios-plugins-2.3.3
+
+- name: Install Nagios Plugins
+  command: make install
+  args:
+    chdir: /tmp/nagios-plugins-2.3.3

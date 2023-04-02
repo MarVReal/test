@@ -10,6 +10,15 @@
     dest: /tmp
     remote_src: yes
 
+- name: Change ownership of Nagios directory
+  become: yes
+  become_user: root
+  file:
+    path: /usr/local/nagios
+    owner: nagios
+    group: nagios
+    recurse: yes
+
 - name: Configure Nagios Core
   command: ./configure --with-httpd-conf=/etc/httpd/conf.d
   args:

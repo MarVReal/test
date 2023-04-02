@@ -1,17 +1,40 @@
----
-- name: Restart Apache
-  service:
-    name: httpd
-    state: restarted
-  when: ansible_os_family == 'RedHat'
+- name: Configure Nagios Core for email notifications
+  block:
+    - name: Create contacts.cfg file
+      file:
+        path: /usr/local/nagios/etc/objects/contacts.cfg
+        state: touch
+        mode: '0644'
 
-- name: Restart Apache
-  service:
-    name: apache2
-    state: restarted
-  when: ansible_os_family == 'Debian'
+    - name: Configure Nagios Core for email notifications
+      lineinfile:
+        path: /usr/local/nagios/etc/objects/contacts.cfg
+        regexp: '^(.*email.*)(;)(.*)$'
+        line: '\1\3'
+      when: ansible_os_family == 'RedHat'
 
-- name: Restart Nagios Core
-  service:
-    name: nagios
-    state: restarted
+    - name: Configure Nagios Core for email notifications
+      lineinfile:
+        path: /usr/local/nagios/etc/objects/contacts.cfg
+        regexp: '^(.*pager.*)(;)(.*)$'
+        line: '\1\3'
+      when: ansible_os_family == 'Debian'
+
+  when: nagios_installed.changed
+  become: yes
+
+- name: Set Nagios Core password
+  block:
+    - name: Create htpasswd.users file
+      file:
+        path: /usr/local/nagios/etc/htpasswd.users
+        state: touch
+        mode: '0644'
+
+    - name: Set Nagios Core password
+      shell: htpasswd -b /usr/local/nagios/etc/htpasswd.users nagiosadmin nagiosadmin
+      args:
+        executable: /bin/bash
+
+  when: nagios_installed.changed
+  become: yes

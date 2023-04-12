@@ -1,49 +1,42 @@
----
-- name: Install Nagios
-  hosts: all
-  become: yes
+- name: Making directory for prometheus (Ubuntu)
+  file:
+    path: ~/prometheus
+    state: directory
 
-  roles:
-    - common
-    - nagios
+- name: Download Prometheus (Ubuntu)
+  unarchive:
+    src: https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
+    dest: ~/prometheus
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+  register: command_output
+- debug:
+	var: command_output.stdout_lines
 
-- name: Configure Nagios Core for email notifications
-  tasks:
-    - name: Create contacts.cfg file
-      file:
-        path: /usr/local/nagios/etc/objects/contacts.cfg
-        state: touch
-        mode: '0644'
+- name: Stopping current service
+  tags: serviceon
+  service:
+    name: prometheus
+    state: stopped
 
-    - name: Configure Nagios Core for email notifications (RedHat)
-      lineinfile:
-        path: /usr/local/nagios/etc/objects/contacts.cfg
-        regexp: '^(.*email.*)(;)(.*)$'
-        line: '\1\3'
-      when: ansible_os_family == 'RedHat'
+- name: Executables(Ubuntu)
+  shell: |
+    cd ~/prometheus/prometheus*
+    cp -r . /usr/local/bin/prometheus
 
-    - name: Configure Nagios Core for email notifications (Debian)
-      lineinfile:
-        path: /usr/local/nagios/etc/objects/contacts.cfg
-        regexp: '^(.*pager.*)(;)(.*)$'
-        line: '\1\3'
-      when: ansible_os_family == 'Debian'
+- name: Setup Service File(Ubuntu)
+  copy:
+    src: prometheus.service
+    dest: /etc/systemd/system/
+    mode: 0755
+    owner: root
+    group: root
 
-  when: nagios_installed.changed
-  become: yes
-
-- name: Set Nagios Core password
-  tasks:
-    - name: Create htpasswd.users file
-      file:
-        path: /usr/local/nagios/etc/htpasswd.users
-        state: touch
-        mode: '0644'
-
-    - name: Set Nagios Core password
-      shell: htpasswd -b /usr/local/nagios/etc/htpasswd.users nagiosadmin nagiosadmin
-      args:
-        executable: /bin/bash
-
-  when: nagios_installed.changed
-  become: yes
+- name: starting and enabling prometheus (Ubuntu)
+  systemd:
+    name: prometheus
+    state: started
+    daemon_reload: true
+    enabled: true

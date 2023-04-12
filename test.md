@@ -12,6 +12,9 @@
     mode: 0777
     owner: root
     group: root
+  register: command_output
+- debug:
+	var: command_output.stdout_lines
 
 - name: Stopping current service
   tags: serviceon

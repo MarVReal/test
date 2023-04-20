@@ -1,1 +1,1 @@
-FAILED! => {"changed": false, "commands": ["/usr/sbin/ufw status verbose", "/usr/bin/grep -h '^### tuple' /lib/ufw/user.rules /lib/ufw/user6.rules /etc/ufw/user.rules /etc/ufw/user6.rules /var/lib/ufw/user.rules /var/lib/ufw/user6.rules", "/usr/sbin/ufw --version", "/usr/sbin/ufw allow from any to any port 9200/top comment 'Allow Elasticsearch'"], "msg": "ERROR: Bad port '9200/top'\n"}
+fatal: [192.168.56.102]: FAILED! => {"changed": false, "failures": ["No package kibana available."], "msg": "Failed to install some of the specified packages", "rc": 1, "results": []}

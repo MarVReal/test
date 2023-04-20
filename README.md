@@ -1,1 +1,1 @@
-fatal: [192.168.56.103]: FAILED! => {"changed": false, "msg": "value of state must be one of: absent, build-dep, fixed, latest, present, got: installed"}
+fatal: [192.168.56.103]: FAILED! => {"changed": false, "msg": "Python Module not found: firewalld and its python module are required for this module,                         version 0.2.11 or newer required (0.3.9 or newer for offline operations)"}

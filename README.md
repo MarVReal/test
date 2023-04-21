@@ -1,11 +1,10 @@
-fatal: [192.168.56.103]: FAILED! => {"changed": false, "msg": "ERROR: Exception caught: 'function' object has no attribute 'get_zone'"}
+fatal: [192.168.56.103]: FAILED! => {"changed": true, "cmd": "firewall-cmd --permanent --zone=public --add-port=9600/tcp\nsleep 10\nfirewall-cmd --reload\n", "delta": "0:00:10.005251", "end": "2023-04-21 08:42:17.645914", "msg": "non-zero return code", "rc": 127, "start": "2023-04-21 08:42:07.640663", "stderr": "/bin/sh: 1: firewall-cmd: not found\n/bin/sh: 3: firewall-cmd: not found", "stderr_lines": ["/bin/sh: 1: firewall-cmd: not found", "/bin/sh: 3: firewall-cmd: not found"], "stdout": "", "stdout_lines": []}
 
-- name: Opening port for elasticsearch
-  firewalld:
-    port: 5601/tcp
-    zone: public
-    permanent: yes
-    state: enabled
 
-fatal: [192.168.56.103]: FAILED! => {"changed": false, "commands": ["/usr/sbin/ufw status verbose", "/usr/bin/grep -h '^### tuple' /lib/ufw/user.rules /lib/ufw/user6.rules /etc/ufw/user.rules /etc/ufw/user6.rules /var/lib/ufw/user.rules /var/lib/ufw/user6.rules", "/usr/sbin/ufw --version", "/usr/sbin/ufw allow from any to any port 5601/tcp"], "msg": "ERROR: Bad port '5601/tcp'\n"}
-
+- name: Opening port for Logstash (CentOS)
+  become: true
+  shell: |
+    firewall-cmd --permanent --zone=public --add-port=9600/tcp
+    sleep 10
+    firewall-cmd --reload
+  when: ansible_distribution == "CentOS"

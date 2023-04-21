@@ -1,1 +1,1 @@
-fatal: [192.168.56.103]: FAILED! => {"changed": false, "msg": "Python Module not found: firewalld and its python module are required for this module,                         version 0.2.11 or newer required (0.3.9 or newer for offline operations)"}
+fatal: [192.168.56.102]: FAILED! => {"changed": false, "failures": ["No package firewalld-python available."], "msg": "Failed to install some of the specified packages", "rc": 1, "results": []}

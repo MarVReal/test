@@ -1,45 +1,52 @@
-- name: Making directory for prometheus (CentOS)
-  file:
-    path: ~/prometheus
-    state: directory
+---
+- name: Set up a firewall on Ubuntu and CentOS 9
+ hosts: all
+ become: yes
+ tasks:
+    - name: Install and enable firewalld
+      ansible.builtin.package:
+        name: firewalld
+        state: present
+      when: ansible_os_family == 'RedHat'
 
-- name: Download and Extract Prometheus (CentOS)
-  tags: source
-  unarchive:
-    src: https://github.com/prometheus/prometheus/releases/download/v2.43.0/prometheus-2.43.0.linux-amd64.tar.gz
-    dest: ~/prometheus
-    remote_src: yes
-    mode: 0777
-    owner: root
-    group: root
-  register: command_output
-- debug:
-	var: command_output.stdout_lines
+    - name: Enable and start firewalld service
+      ansible.builtin.systemd:
+        name: firewalld
+        enabled: yes
+        state: started
+      when: ansible_os_family == 'RedHat'
 
-- name: Stopping current service
-  tags: serviceon
-  service:
-    name: prometheus
-    state: stopped
+    - name: Open firewall ports for SSH, HTTP, and HTTPS
+      ansible.builtin.firewalld:
+        port: "{{ item }}/tcp"
+        permanent: yes
+        state: enabled
+      with_items:
+        - 22
+        - 80
+        - 443
+      when: ansible_os_family == 'RedHat'
 
-- name: Adding Executables (CentOS)
-  tags: executables
-  shell: |
-    cd ~/prometheus/prometheus*
-    cp -r . /usr/local/bin/prometheus
+    - name: Install and enable UFW
+      ansible.builtin.package:
+        name: ufw
+        state: present
+      when: ansible_os_family == 'Debian'
 
-- name: Copying Service File
-  tags: servicefile
-  copy:
-    src: prometheus.service
-    dest: /etc/systemd/system/
-    owner: root
-    group: root
-    mode: 777
+    - name: Enable and start UFW service
+      ansible.builtin.systemd:
+        name: ufw
+        enabled: yes
+        state: started
+      when: ansible_os_family == 'Debian'
 
-- name: Verifying installation
-  tags: serviceon
-  service:
-    name: prometheus
-    state: restarted
-    enabled: true
+    - name: Open firewall ports for SSH, HTTP, and HTTPS
+      ansible.builtin.ufw:
+        port: "{{ item }}"
+        proto: tcp
+        state: enabled
+      with_items:
+        - 22
+        - 80
+        - 443
+      when: ansible_os_family == 'Debian'
